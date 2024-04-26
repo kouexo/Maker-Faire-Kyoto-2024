@@ -9,12 +9,15 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
 # センサーのピン設定
+#center
 TRIG1 = 24
 ECHO1 = 27
-TRIG2 = 22
-ECHO2 = 23
-TRIG3 = 20
-ECHO3 = 21
+#right
+TRIG2 = 25
+ECHO2 = 21
+#left
+TRIG3 = 23
+ECHO3 = 17
 
 GPIO.setup(TRIG1, GPIO.OUT)
 GPIO.setup(ECHO1, GPIO.IN)
@@ -55,6 +58,7 @@ def set_angle(servo1, angle1, servo2, angle2):
 # --------------------------------------------------------------------
 def measure_distance(trig, echo):
     """距離を測定する関数"""
+    time.sleep(0.3)
     GPIO.output(trig, True)
     time.sleep(0.00001)
     GPIO.output(trig, False)
@@ -73,32 +77,39 @@ def avoid_obstacle():
     print("障害物を検知しました。回避します。")
     dist2 = measure_distance(TRIG2, ECHO2)#右側センサー
     dist3 = measure_distance(TRIG3, ECHO3)#左側センサー
+    print(f"distance2 = {dist2} cm")
+    print(f"distance3 = {dist3} cm")
+    time.sleep(1.0)  # 1秒の遅延を追加
     #距離の遠いほうに旋回→直進→距離の遠いほうに旋回→直進。
     #if文を２回行っていて冗長な気もする
     #適宜モーターの値を調整する。
     if dist2 > dist3:#右側が広い時
         print("右に回避")
-        set_angle(servo_pin1, 0, servo_pin2, 180)  # 右に旋回
-        time.sleep(1.0)  # 1秒旋回
+        set_angle(servo_pin1, 90, servo_pin2, 180)  # 右に旋回
+        time.sleep(1.3)  
     else:
         print("左に回避")
         set_angle(servo_pin1, 180, servo_pin2, 0)  # 左に旋回
-        time.sleep(1.0)  # 1秒旋回
-
-    set_angle(servo_pin1, 90, servo_pin2, 90)  # 直進
-    time.sleep(1.0)  # 1秒直進
+        time.sleep(1.3)  
+    
+	
+    set_angle(servo_pin1, 0, servo_pin2, 180)  # 直進
+    print("go")
+    time.sleep(0.8) 
 
     if dist2 > dist3:
         print("左に戻る")
-        set_angle(servo_pin1, 180, servo_pin2, 0)  # 左に旋回
+        set_angle(servo_pin1, 0, servo_pin2, 90)  # 左に旋回
         time.sleep(1.0)  # 1秒旋回
     else:
         print("右に戻る")
         set_angle(servo_pin1, 0, servo_pin2, 180)  # 右に旋回
         time.sleep(1.0)  # 1秒旋回
+    time.sleep(1.0)  # 1秒の遅延を追加
 
     print("元の道に戻りました。")
-    set_angle(servo_pin1, 90, servo_pin2, 90)  # 直進
+    set_angle(servo_pin1, 0, servo_pin2, 180)  # 直進
+    time.sleep(1.0)
 # --------------------------------------------------------------------
 try:
     while True:
@@ -110,7 +121,7 @@ try:
             avoid_obstacle()
         else:
             print("前進")
-            set_angle(servo_pin1, 90, servo_pin2, 90)  # 直進
+            set_angle(servo_pin1, 0, servo_pin2, 180)  # 直進
             time.sleep(0.1)  # 0.1秒待機
 
 except KeyboardInterrupt:
