@@ -10,11 +10,11 @@ GPIO.setwarnings(False)
 
 # センサーのピン設定
 #center
-TRIG1 = 24
-ECHO1 = 27
+TRIG1 = 25
+ECHO1 = 21
 #right
-TRIG2 = 25
-ECHO2 = 21
+TRIG2 = 24#Nosignal
+ECHO2 = 27#Nosignal
 #left
 TRIG3 = 23
 ECHO3 = 17
@@ -58,7 +58,6 @@ def set_angle(servo1, angle1, servo2, angle2):
 # --------------------------------------------------------------------
 def measure_distance(trig, echo):
     """距離を測定する関数"""
-    time.sleep(0.3)
     GPIO.output(trig, True)
     time.sleep(0.00001)
     GPIO.output(trig, False)
@@ -80,12 +79,9 @@ def avoid_obstacle():
     print(f"distance2 = {dist2} cm")
     print(f"distance3 = {dist3} cm")
     time.sleep(1.0)  # 1秒の遅延を追加
-    #距離の遠いほうに旋回→直進→距離の遠いほうに旋回→直進。
-    #if文を２回行っていて冗長な気もする
-    #適宜モーターの値を調整する。
     if dist2 > dist3:#右側が広い時
         print("右に回避")
-        set_angle(servo_pin1, 90, servo_pin2, 180)  # 右に旋回
+        set_angle(servo_pin1, 0, servo_pin2, 180)  # 右に旋回
         time.sleep(1.3)  
     else:
         print("左に回避")
@@ -113,7 +109,9 @@ def avoid_obstacle():
 # --------------------------------------------------------------------
 try:
     while True:
+		
         #距離が20cm以下の時に左右のセンサー値を取得し広いほうに避ける。20cmより大きい時は直進。
+        print("start")
         dist1 = measure_distance(TRIG1, ECHO1)
         print(f"distance1 = {dist1} cm")
 
@@ -121,8 +119,8 @@ try:
             avoid_obstacle()
         else:
             print("前進")
-            set_angle(servo_pin1, 0, servo_pin2, 180)  # 直進
-            time.sleep(0.1)  # 0.1秒待機
+            set_angle(servo_pin1, 180, servo_pin2, 0)  # 直進
+            time.sleep(0.3)  # 0.1秒待機
 
 except KeyboardInterrupt:
     print("Measurement stopped by User")
